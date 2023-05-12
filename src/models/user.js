@@ -47,12 +47,7 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: true
         }
-    }],
-    avatar: {
-        type: Buffer
-    }
-} , {
-    timestamps: true
+    }]
 })
 
 userSchema.virtual('tasks', {
@@ -67,14 +62,13 @@ userSchema.methods.toJSON = function () {
 
     delete userObject.password
     delete userObject.tokens
-    delete userObject.avatar
 
     return userObject
 }
 
 userSchema.methods.generateAuthToken = async function () {
     const user = this
-    const token = jwt.sign({ _id: user._id.toString() }, process.env.mytoken)
+    const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewcourse')
 
     user.tokens = user.tokens.concat({ token })
     await user.save()
@@ -109,12 +103,10 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
-// delete user task when user is removed
-
-userSchema.pre('remove' , async function(next) {
+// Delete user tasks when user is removed
+userSchema.pre('remove', async function (next) {
     const user = this
-    await Task.deleteMany({owner: user._id})
-
+    await Task.deleteMany({ owner: user._id })
     next()
 })
 
